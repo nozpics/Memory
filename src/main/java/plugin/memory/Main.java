@@ -15,8 +15,5 @@ public final class Main extends JavaPlugin implements Listener {
         getCommand("memorygame").setExecutor(new MemoryCommand());
     }
 
-    @Override
-    public void onDisable() {
-        // Plugin shutdown logic
     }
-}
+
