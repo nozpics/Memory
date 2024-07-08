@@ -50,6 +50,18 @@ public class MemoryCommand implements CommandExecutor {
     public void addBlock(Block block) {
       blocks.add(block);
     }
+
+    //nameメンバ変数のgetter
+    public String getName(){
+      return this.name;
+    }
+
+    // 格納したブロックリストから取り出す
+    public Block getBlock(int i){
+      int idx = Math.min(blocks.size() - 1, i);
+      return this.blocks.get(idx);
+    }
+
   }
 
   /**
@@ -60,7 +72,8 @@ public class MemoryCommand implements CommandExecutor {
    */
   public Location getSpawnLocation(Player player, World world) {
     Location playerLocation = player.getLocation();
-
+    for (Pair pair : pairs) {
+      for (int j = 0; j < 2; j++) {
     //現在のプレイヤー位置の周りにランダム（前後１０ブロック以内）で位置を取得
     int randomX = new SplittableRandom().nextInt(20) - 10;
     int randomZ = new SplittableRandom().nextInt(20) - 10;
@@ -68,15 +81,14 @@ public class MemoryCommand implements CommandExecutor {
     double y = playerLocation.getY();
     double z = playerLocation.getZ() + randomZ;
 
-
-    //プレイヤーの周りにランダムでダイヤブロックを２つ生成後、ペアに登録。それをpairsの要素数だけ（今回は５回）繰り返す。
-    for (Pair pair : pairs) {
-      for (int j = 0; j < 2; j++) {
-        Location blockLoc = playerLocation.clone().add(x, y, z);
+        Location blockLoc = new Location(world, x, y, z);
         blockLoc.getBlock().setType(Material.DIAMOND_BLOCK);
         pair.addBlock(blockLoc.getBlock());
+
+        player.sendTitle("START!","", 10, 70, 20);
+
       }
     }
-    return new Location(world, x, y, z);
+    return playerLocation;
   }
   }
