@@ -7,7 +7,9 @@ import java.util.Map;
 import java.util.SplittableRandom;
 import java.util.UUID;
 import org.bukkit.block.Block;
-import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.block.Action;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -19,6 +21,7 @@ import org.bukkit.entity.Player;
 public class MemoryCommand implements CommandExecutor {
 
   private final List<Pair> pairs = new ArrayList<>();
+  private final Map<UUID, Pair> lastTouched = new HashMap<>();
 
 
   @Override
@@ -30,14 +33,42 @@ public class MemoryCommand implements CommandExecutor {
       player.setHealth(20);
       player.setFoodLevel(20);
 
-      for (int i = 1; i <= 5; i++) {
+      for (int i = 1; i <= 2; i++) {
         pairs.add(new Pair(i + "番です！"));
     }
       getSpawnLocation(player,world);
     }
-    return false;
+    return true;
   }
 
+  //プレイヤーがブロックをクリックした際に発生するイベント
+  @EventHandler
+  public void onPlayerInteractEvent(PlayerInteractEvent event){
+    //ブロックを右クリックしたらブロック情報を取得
+    if(event.getAction() != Action.RIGHT_CLICK_BLOCK) return;
+    Block block = event.getClickedBlock();
+
+    if(block == null || block.getType() != Material.DIAMOND_BLOCK) return;
+    //クリック先がダイヤモンドブロックなら、プレイヤー情報を取得
+    Player player = event.getPlayer();
+    UUID playerId = player.getUniqueId();
+
+
+    for(Pair pair : pairs){
+      if(pair.containsBlock(block)){
+        //タッチしたブロックの「i+番です！」が表示される
+        player.sendMessage(pair.getName());
+
+        //過去にタッチされたブロックと今回タッチしたブロックが一致したら、ダイヤモンドブロックがAIRに変わる
+        if(lastTouched.containsKey(playerId) && lastTouched.get(playerId) == pair){
+          pair.removeBlocks();
+        }else{
+          lastTouched.put(playerId, pair);
+        }
+        break;
+      }
+    }
+  }
 
 
   private static class Pair{
@@ -47,6 +78,7 @@ public class MemoryCommand implements CommandExecutor {
     public Pair(String name){
       this.name = name;
     }
+
     public void addBlock(Block block) {
       blocks.add(block);
     }
@@ -61,7 +93,15 @@ public class MemoryCommand implements CommandExecutor {
       int idx = Math.min(blocks.size() - 1, i);
       return this.blocks.get(idx);
     }
+    public boolean containsBlock(Block block){
 
+      return blocks.contains(block);
+    }
+    public void removeBlocks(){
+      for(Block block : blocks){
+        block.setType(Material.AIR);
+      }
+    }
   }
 
   /**
@@ -85,8 +125,7 @@ public class MemoryCommand implements CommandExecutor {
         blockLoc.getBlock().setType(Material.DIAMOND_BLOCK);
         pair.addBlock(blockLoc.getBlock());
 
-        player.sendTitle("START!","", 10, 70, 20);
-
+        player.sendTitle("START!","", 10, 50, 20);
       }
     }
     return playerLocation;
