@@ -8,6 +8,7 @@ import java.util.SplittableRandom;
 import java.util.UUID;
 import org.bukkit.block.Block;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.Location;
@@ -18,7 +19,7 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-public class MemoryCommand implements CommandExecutor {
+public class MemoryGameCommand implements CommandExecutor, Listener {
 
   private final List<Pair> pairs = new ArrayList<>();
   private final Map<UUID, Pair> lastTouched = new HashMap<>();
@@ -41,7 +42,7 @@ public class MemoryCommand implements CommandExecutor {
     return true;
   }
 
-  //プレイヤーがブロックをクリックした際に発生するイベント
+  //プレイヤーがブロックをクリックした際に発生するイベント（現状なにも動作しない）
   @EventHandler
   public void onPlayerInteractEvent(PlayerInteractEvent event){
     //ブロックを右クリックしたらブロック情報を取得
@@ -52,18 +53,20 @@ public class MemoryCommand implements CommandExecutor {
     //クリック先がダイヤモンドブロックなら、プレイヤー情報を取得
     Player player = event.getPlayer();
     UUID playerId = player.getUniqueId();
-
+    player.sendMessage("Debug: Block clicked");
 
     for(Pair pair : pairs){
       if(pair.containsBlock(block)){
         //タッチしたブロックの「i+番です！」が表示される
         player.sendMessage(pair.getName());
-
+        player.sendMessage("Debug: Block is in pair");
         //過去にタッチされたブロックと今回タッチしたブロックが一致したら、ダイヤモンドブロックがAIRに変わる
         if(lastTouched.containsKey(playerId) && lastTouched.get(playerId) == pair){
           pair.removeBlocks();
+          player.sendMessage("Debug: Block removed");
         }else{
           lastTouched.put(playerId, pair);
+          player.sendMessage("Debug: Block registered");
         }
         break;
       }
