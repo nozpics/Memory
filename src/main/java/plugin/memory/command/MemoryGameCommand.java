@@ -42,7 +42,7 @@ public class MemoryGameCommand implements CommandExecutor, Listener {
     return true;
   }
 
-  //プレイヤーがブロックをクリックした際に発生するイベント（現状なにも動作しない）
+  //プレイヤーがブロックを右クリックした際に発生するイベント
   @EventHandler
   public void onPlayerInteractEvent(PlayerInteractEvent event){
     //ブロックを右クリックしたらブロック情報を取得
@@ -55,11 +55,14 @@ public class MemoryGameCommand implements CommandExecutor, Listener {
     UUID playerId = player.getUniqueId();
     player.sendMessage("Debug: Block clicked");
 
+    boolean pairFound = false;
     for(Pair pair : pairs){
       if(pair.containsBlock(block)){
-        //タッチしたブロックの「i+番です！」が表示される
+        //タッチしたブロックの「i+番です！」が表示されるはずだが、されないのでここが原因？
+        pairFound = true;
         player.sendMessage(pair.getName());
         player.sendMessage("Debug: Block is in pair");
+
         //過去にタッチされたブロックと今回タッチしたブロックが一致したら、ダイヤモンドブロックがAIRに変わる
         if(lastTouched.containsKey(playerId) && lastTouched.get(playerId) == pair){
           pair.removeBlocks();
@@ -70,6 +73,10 @@ public class MemoryGameCommand implements CommandExecutor, Listener {
         }
         break;
       }
+    }
+    //pairが見つからなかったらメッセージを表示
+    if (!pairFound) {
+      player.sendMessage("Debug: No matching pair found");
     }
   }
 
@@ -125,9 +132,13 @@ public class MemoryGameCommand implements CommandExecutor, Listener {
     double z = playerLocation.getZ() + randomZ;
 
         Location blockLoc = new Location(world, x, y, z);
+        // ブロックが既にある場合、もう一度位置を生成する
+        if (blockLoc.getBlock().getType() != Material.AIR) {
+          j--;
+          continue;
+        }
         blockLoc.getBlock().setType(Material.DIAMOND_BLOCK);
         pair.addBlock(blockLoc.getBlock());
-
         player.sendTitle("START!","", 10, 50, 20);
       }
     }
