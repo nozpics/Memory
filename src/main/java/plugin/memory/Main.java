@@ -6,6 +6,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import plugin.memory.command.MemoryGameCommand;
 
 public final class Main extends JavaPlugin implements Listener {
+    private MemoryGameCommand memoryGameCommand;
 
     @Override
     public void onEnable() {
@@ -14,6 +15,5 @@ public final class Main extends JavaPlugin implements Listener {
         Bukkit.getPluginManager().registerEvents(memoryGameCommand, this);
         getCommand("memorygame").setExecutor(new MemoryGameCommand());
     }
-
     }
 
