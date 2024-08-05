@@ -51,13 +51,16 @@ public class MemoryGameCommand implements CommandExecutor, Listener {
   //プレイヤーがブロックを右クリックした際に発生するイベント
   @EventHandler
   public void onPlayerInteractEvent(PlayerInteractEvent event) {
+    //if (event.getAction() != Action.RIGHT_CLICK_BLOCK)
+    if (event.getAction() != Action.RIGHT_CLICK_BLOCK || event.getHand() != org.bukkit.inventory.EquipmentSlot.HAND)
+      return;
+
     Pairs pairs = Pairs.getInstance(); //Pairsの要素数を再取得
     Player player = event.getPlayer();
     player.sendMessage("Debug: Event Block Count " + pairs.size());
 
     //ブロックを右クリックしたらブロック情報を取得
-    if (event.getAction() != Action.RIGHT_CLICK_BLOCK)
-      return;
+
     Block block = event.getClickedBlock();
 
     if (block == null || block.getType() != Material.DIAMOND_BLOCK)
