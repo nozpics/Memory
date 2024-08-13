@@ -7,7 +7,12 @@ import java.util.Map;
 import java.util.SplittableRandom;
 import java.util.UUID;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.block.Block;
+import org.bukkit.boss.BarColor;
+import org.bukkit.boss.BarFlag;
+import org.bukkit.boss.BarStyle;
+import org.bukkit.boss.BossBar;
 import org.bukkit.entity.Entity;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -30,6 +35,7 @@ public class MemoryGameCommand implements CommandExecutor, Listener {
   private Main main;
   private final Map<UUID, Pair> lastTouched = new HashMap<>();
   private int score;
+  private BossBar bossBar;
 
   public MemoryGameCommand(Main main){
     this.main = main;
@@ -51,17 +57,38 @@ public class MemoryGameCommand implements CommandExecutor, Listener {
       }
       this.getSpawnLocation(player, world);
 
+        // BossBarの作成
+        bossBar = Bukkit.createBossBar("制限時間", BarColor.GREEN, BarStyle.SOLID, BarFlag.CREATE_FOG);
+        bossBar.addPlayer(player);
+        bossBar.setVisible(true);
       //制限時間の設定
       new BukkitRunnable() {
+        int time = 20;
+
         @Override
         public void run() {
-          // 制限時間が経過した際に実行する処理
-          player.sendTitle("ゲーム終了！", "最終スコアは"+ score +"点", 10, 50, 20);
-          // 残っているダイヤブロックを消す処理
-          pairs.getPairs().forEach(Pair::removeBlocks);
+          if(time > 0){
+            double progress = time / 20.0;
+            bossBar.setProgress(progress);
 
+            // 残り3秒でカウントダウン
+            if (time <= 3) {
+              String title = ChatColor.WHITE + String.valueOf(time);
+              player.sendTitle(title, "", 0, 20, 0);
+            }
+
+            time--;
+          } else {
+            bossBar.setVisible(false);
+            cancel();
+            // 制限時間が経過した際に実行する処理
+            player.sendTitle("ゲーム終了！", "最終スコアは" + score + "点", 10, 50, 20);
+            // 残っているダイヤブロックを消す処理
+            pairs.getPairs().forEach(Pair::removeBlocks);
+          }
         }
-      }.runTaskLater(main, 20 * 20L); // 20秒後に実行
+      }.runTaskTimer(main, 0,20L);
+
     }
     return true;
   }
