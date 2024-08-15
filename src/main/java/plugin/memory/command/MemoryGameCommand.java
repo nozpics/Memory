@@ -34,7 +34,7 @@ import plugin.memory.data.PlayerScore;
 public class MemoryGameCommand implements CommandExecutor, Listener {
   private Main main;
   private final Map<UUID, Pair> lastTouched = new HashMap<>();
-  private int score;
+  private final Map<String, Integer> playerScores = new HashMap<>();
   private BossBar bossBar;
 
   public MemoryGameCommand(Main main){
@@ -56,11 +56,15 @@ public class MemoryGameCommand implements CommandExecutor, Listener {
         pairs.add(new Pair(i + "番！"));
       }
       this.getSpawnLocation(player, world);
+      //プレイヤーごとのスコアを初期化
+      String playerName = player.getName();
+      playerScores.put(playerName, 0);
 
         // BossBarの作成
         bossBar = Bukkit.createBossBar("制限時間", BarColor.GREEN, BarStyle.SOLID, BarFlag.CREATE_FOG);
         bossBar.addPlayer(player);
         bossBar.setVisible(true);
+
       //制限時間の設定
       new BukkitRunnable() {
         int time = 20;
@@ -82,7 +86,11 @@ public class MemoryGameCommand implements CommandExecutor, Listener {
             bossBar.setVisible(false);
             cancel();
             // 制限時間が経過した際に実行する処理
-            player.sendTitle("ゲーム終了！", "最終スコアは" + score + "点", 10, 50, 20);
+            player.sendMessage("DEBUG: PlayerName2 = " + playerName);
+            player.sendMessage("DEBUG: Final Score = " + playerScores.get(playerName));
+
+            int finalScore = playerScores.get(playerName);
+            player.sendTitle("ゲーム終了！", playerName + "は" + finalScore + "点を獲得した！", 10, 50, 20);
             // 残っているダイヤブロックを消す処理
             pairs.getPairs().forEach(Pair::removeBlocks);
           }
@@ -110,14 +118,18 @@ public class MemoryGameCommand implements CommandExecutor, Listener {
       return;
     //クリック先がダイヤモンドブロックなら、プレイヤー情報を取得
     UUID playerId = player.getUniqueId();
+    String playerName = player.getName();
     for(Pair pair : pairs.getPairs()){
       if(pair.containsBlock(block)){
         player.sendMessage(pair.getName());
         //過去にタッチされたブロックと今回タッチしたブロックが一致したら、ダイヤモンドブロックがAIRに変わる
         if(this.lastTouched.containsKey(playerId) && this.lastTouched.get(playerId) == pair){
           pair.removeBlocks();
-          score +=10;
-          player.sendMessage("10点！　現在のスコアは" + score + "点");
+
+          int newScore = playerScores.getOrDefault(playerName, 0) + 10;
+          playerScores.put(playerName, newScore);
+          player.sendMessage("DEBUG: PlayerName1 = " + playerName);
+          player.sendMessage("10点！　現在のスコアは" + newScore + "点");
         }else{
           this.lastTouched.put(playerId, pair);
         }
