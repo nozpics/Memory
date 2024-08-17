@@ -11,9 +11,9 @@ public final class Main extends JavaPlugin implements Listener {
     @Override
     public void onEnable() {
         // Plugin startup logic
-        MemoryGameCommand memoryGameCommand = new MemoryGameCommand(this);
+        memoryGameCommand = new MemoryGameCommand(this);
         Bukkit.getPluginManager().registerEvents(memoryGameCommand, this);
-        getCommand("memorygame").setExecutor(new MemoryGameCommand(this));
+        getCommand("memorygame").setExecutor(memoryGameCommand);
     }
     }
 

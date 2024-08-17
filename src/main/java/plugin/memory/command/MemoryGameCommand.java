@@ -8,6 +8,7 @@ import java.util.SplittableRandom;
 import java.util.UUID;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarFlag;
@@ -49,7 +50,7 @@ public class MemoryGameCommand implements CommandExecutor, Listener {
 
       player.setHealth(20);
       player.setFoodLevel(20);
-
+      player.playSound(player.getLocation(), Sound.ITEM_GOAT_HORN_SOUND_1,1.0f,1.0f);
 
       Pairs pairs = Pairs.getInstance();
       for (int i = 1; i <= 5; i++) {
@@ -79,6 +80,7 @@ public class MemoryGameCommand implements CommandExecutor, Listener {
             if (time <= 3) {
               String title = ChatColor.WHITE + String.valueOf(time);
               player.sendTitle(title, "", 0, 20, 0);
+              player.playSound(player.getLocation(), Sound.BLOCK_ANVIL_PLACE,0.5f,1.0f);
             }
 
             time--;
@@ -86,9 +88,7 @@ public class MemoryGameCommand implements CommandExecutor, Listener {
             bossBar.setVisible(false);
             cancel();
             // 制限時間が経過した際に実行する処理
-            player.sendMessage("DEBUG: PlayerName2 = " + playerName);
-            player.sendMessage("DEBUG: Final Score = " + playerScores.get(playerName));
-
+            player.playSound(player.getLocation(), Sound.ITEM_GOAT_HORN_SOUND_5,1.0f,1.0f);
             int finalScore = playerScores.get(playerName);
             player.sendTitle("ゲーム終了！", playerName + "は" + finalScore + "点を獲得した！", 10, 50, 20);
             // 残っているダイヤブロックを消す処理
@@ -125,13 +125,13 @@ public class MemoryGameCommand implements CommandExecutor, Listener {
         //過去にタッチされたブロックと今回タッチしたブロックが一致したら、ダイヤモンドブロックがAIRに変わる
         if(this.lastTouched.containsKey(playerId) && this.lastTouched.get(playerId) == pair){
           pair.removeBlocks();
-
+          player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP,1.0f,1.0f);
           int newScore = playerScores.getOrDefault(playerName, 0) + 10;
           playerScores.put(playerName, newScore);
-          player.sendMessage("DEBUG: PlayerName1 = " + playerName);
           player.sendMessage("10点！　現在のスコアは" + newScore + "点");
         }else{
           this.lastTouched.put(playerId, pair);
+          player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BELL,1.0f,1.0f);
         }
         break;
       }
