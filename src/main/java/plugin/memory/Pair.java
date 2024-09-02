@@ -3,12 +3,17 @@ package plugin.memory;
 
 import java.util.ArrayList;
 import java.util.List;
+import lombok.Getter;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Entity;
 
 public class Pair {
+  //nameメンバ変数のgetter
+  @Getter
   private final String name;
   private final List<Block> blocks = new ArrayList<>();
+  private final List<Entity> entities = new ArrayList<>();
 
   public Pair(String name){
     this.name = name;
@@ -17,10 +22,8 @@ public class Pair {
   public void addBlock(Block block) {
     blocks.add(block);
   }
-
-  //nameメンバ変数のgetter
-  public String getName(){
-    return this.name;
+  public void addEntity(Entity entity){
+    entities.add(entity);
   }
 
   // 格納したブロックリストから取り出す
@@ -37,4 +40,12 @@ public class Pair {
       block.setType(Material.AIR);
     }
   }
+   public boolean containsEntity(Entity entity){
+     return entities.contains(entity);
+   }
+   public void removeEntities(){
+    for(Entity entity : entities){
+      entity.remove();
+    }
+   }
 }

@@ -21,6 +21,10 @@ public class Pairs {
     return instance;
   }
 
+  public static synchronized void resetInstance() {
+    instance = new Pairs(); // 新しいインスタンスで置き換え
+  }
+
   // ラッパーメソッド
   public void add(Pair p){
     this.pairs.add(p);
