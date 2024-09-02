@@ -76,8 +76,7 @@ public class MemoryGameCommand extends BaseCommand implements Listener {
       return false;
     }
 
-    initGame(player,difficulty);
-    finalCountDown(player, difficulty);
+    startGameCountdown(player,difficulty);
     return true;
   }
 
@@ -116,6 +115,31 @@ public class MemoryGameCommand extends BaseCommand implements Listener {
     }
     player.sendMessage(ChatColor.RED + "実行できません。コマンド引数の１つ目に[easy,normal,hard]いずれかの難易度指定が必要です。");
     return NONE;
+  }
+
+  /**
+   * ゲーム開始前のカウントダウン処理。
+   *
+   * @param player　コマンドを実行したプレイヤー
+   * @param difficulty　難易度
+   */
+  private void startGameCountdown(Player player, String difficulty) {
+    new BukkitRunnable() {
+      int countdown = 3;
+
+      @Override
+      public void run() {
+        if (countdown > 0) {
+          player.sendTitle(ChatColor.WHITE + String.valueOf(countdown), "", 0, 20, 0);
+          player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_HARP, 1.0f, 1.0f);
+          countdown--;
+        } else {
+          initGame(player, difficulty);
+          finalCountDown(player, difficulty);
+          cancel();
+        }
+      }
+    }.runTaskTimer(main, 0, 20L);
   }
 
   /**
