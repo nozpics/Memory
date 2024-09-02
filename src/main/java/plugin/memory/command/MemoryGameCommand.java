@@ -75,27 +75,59 @@ public class MemoryGameCommand extends BaseCommand implements Listener {
       player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BASS,1.0f,1.0f);
       return false;
     }
+
     initGame(player,difficulty);
-    countDown(player, difficulty);
+    finalCountDown(player, difficulty);
     return true;
   }
 
-
-
   @Override
-  public boolean onExecuteNPCCommand(CommandSender commandSender,Command command, String s,
-      String[] strings) {
+  public boolean onExecuteNPCCommand(CommandSender commandSender,Command command, String label,
+      String[] args) {
     return false;
   }
 
   /**
+   * 現在登録されているスコアの一覧をメッセージに送る。
+   * @param player　プレイヤー
+   */
+  private void sendPlayerScoreList(Player player) {
+    List<PlayerScore> playerScoreList = playerScoreData.selectList();
+    for(PlayerScore playerScore : playerScoreList){
+      player.sendMessage(
+          playerScore.getId() + "  |  "
+              + playerScore.getPlayerName() + "  |  "
+              + playerScore.getScore() + "  |  "
+              + playerScore.getDifficulty() + "  |  "
+              + playerScore.getRegisteredAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+    }
+  }
+
+  /**
+   * 難易度をコマンド引数から取得。
+   * @param player　コマンドを実行したプレイヤー
+   * @param args　コマンド引数
+   * @return NONE
+   */
+  private String getDifficulty(Player player, String[] args) {
+    if(args.length ==1 && (EASY.equals(args[0]) || NORMAL.equals(args[0]) || HARD.equals(
+        args[0]))){
+      return args[0];
+    }
+    player.sendMessage(ChatColor.RED + "実行できません。コマンド引数の１つ目に[easy,normal,hard]いずれかの難易度指定が必要です。");
+    return NONE;
+  }
+
+  /**
    * ゲームを開始する処理。
+   * 制限時間の表示、エンティティの生成。
    * @param player　コマンドを実行したプレイヤー
    * @param difficulty 難易度
    */
   private void initGame(Player player, String difficulty) {
     Pairs.resetInstance();
     resetBossBar();
+
     Pairs pairs = Pairs.getInstance();
     for (int i = 1; i <= 5; i++) {
       pairs.add(new Pair(i + "番！"));
@@ -104,6 +136,7 @@ public class MemoryGameCommand extends BaseCommand implements Listener {
     setUpBossBar(player);
     player.sendTitle("START!", "", 10, 50, 20);
     player.playSound(player.getLocation(), Sound.ITEM_GOAT_HORN_SOUND_1,1.0f,1.0f);
+
     getSpawnLocation(player, difficulty);
   }
 
@@ -126,31 +159,115 @@ public class MemoryGameCommand extends BaseCommand implements Listener {
     bossBar.setVisible(true);
   }
 
+  /**
+   * 難易度に合わせてブロックやエンティティのペアを生成する。
+   *
+   * @param player　コマンドを実行したプレイヤー
+   * @param difficulty 難易度
+   */
+  public void getSpawnLocation(Player player, String difficulty){
+    Pairs pairs = Pairs.getInstance();
+    Location playerLocation = player.getLocation();
+
+    for (Pair pair : pairs.getPairs()) {
+      for (int j = 0; j < 2; j++) {
+        Location memoryLoc = getMemoryLoc(player.getWorld(), playerLocation);
+        if (memoryLoc.getBlock().getType() != Material.AIR) {
+          j--;
+          continue;
+        }
+        switch (difficulty) {
+          case EASY:
+            handleEasyDifficulty(memoryLoc, pair);
+            break;
+          case NORMAL:
+            handleNormalDifficulty(memoryLoc, pair, player);
+            break;
+          case HARD:
+            handleHardDifficulty(memoryLoc, pair, player);
+            break;
+        }
+      }
+    }
+  }
 
   /**
-   * 現在登録されているスコアの一覧をメッセージに送る。
-   * @param player　プレイヤー
+   * ブロックとエンティティの出現エリアを取得する
+   * @param world　プレイヤーが所属するワールド
+   * @param playerLocation　コマンドを実行したプレイヤーの現在地
+   * @return memoryLoc 出現エリア
    */
-  private void sendPlayerScoreList(Player player) {
-    List<PlayerScore> playerScoreList = playerScoreData.selectList();
-    for(PlayerScore playerScore : playerScoreList){
-      player.sendMessage(
-          playerScore.getId() + "  |  "
-              + playerScore.getPlayerName() + "  |  "
-              + playerScore.getScore() + "  |  "
-              + playerScore.getDifficulty() + "  |  "
-              + playerScore.getRegisteredAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
-    }
+  private static Location getMemoryLoc(World world, Location playerLocation) {
+    int randomX = new SplittableRandom().nextInt(20) - 10;
+    int randomZ = new SplittableRandom().nextInt(20) - 10;
+    double x = playerLocation.getX() + randomX;
+    double y = playerLocation.getY();
+    double z = playerLocation.getZ() + randomZ;
+
+    return new Location(world, x, y, z);
+  }
+
+  /**
+   * 難易度easyの処理。ダイヤモンドブロックのペアを生成する。
+   *
+   * @param memoryLoc　ブロックの出現エリア
+   * @param pair　ペア要素
+   */
+  private void handleEasyDifficulty(Location memoryLoc, Pair pair) {
+    memoryLoc.getBlock().setType(Material.DIAMOND_BLOCK);
+    pair.addBlock(memoryLoc.getBlock());
+  }
+
+  /**
+   * 難易度normalの処理。白い羊のペアを生成する。
+   *
+   * @param memoryLoc　エンティティの出現エリア
+   * @param pair　ペア要素
+   * @param player　コマンドを実行したプレイヤー
+   */
+  private void handleNormalDifficulty(Location memoryLoc, Pair pair, Player player) {
+    Sheep sheep = (Sheep) player.getWorld().spawnEntity(memoryLoc, EntityType.SHEEP);
+    sheep.setColor(DyeColor.WHITE);
+    pair.addEntity(sheep);
+  }
+
+  /**
+   * 難易度hardの処理。プレイヤーの状態を整え、ゾンビのペアを生成する。
+   *
+   * @param memoryLoc　エンティティの出現エリア
+   * @param pair　ペア要素
+   * @param player　コマンドを実行したプレイヤー
+   */
+  private void handleHardDifficulty(Location memoryLoc, Pair pair, Player player) {
+    initPlayerStatus(player);
+    Zombie zombie = (Zombie) player.getWorld().spawnEntity(memoryLoc, EntityType.ZOMBIE);
+    pair.addEntity(zombie);
+  }
+
+  /**
+   * ゲーム難易度HARDを始める前にプレイヤーの状態を設定する。
+   * 体力と空腹度を最大にして、装備はネザライト一式になる。
+   *
+   * @param player　コマンドを実行したプレイヤー
+   */
+  private void initPlayerStatus(Player player) {
+    player.setHealth(20);
+    player.setFoodLevel(20);
+
+    PlayerInventory inventory = player.getInventory();
+    inventory.setHelmet(new ItemStack(Material.NETHERITE_HELMET));
+    inventory.setChestplate(new ItemStack(Material.NETHERITE_CHESTPLATE));
+    inventory.setLeggings(new ItemStack(Material.NETHERITE_LEGGINGS));
+    inventory.setBoots(new ItemStack(Material.NETHERITE_BOOTS));
   }
 
   /**
    * 制限時間20秒を設定後、BossBarにて視認できるようにする。
    * ゲーム終了３秒前からカウントダウンし、ゲーム終了する。
-   *
    * @param player　コマンドを実行したプレイヤー
    * @param difficulty　難易度
    */
-  private void countDown(Player player, String difficulty) {
+  private void finalCountDown(Player player, String difficulty) {
     new BukkitRunnable() {
       int time = 20;
 
@@ -160,13 +277,11 @@ public class MemoryGameCommand extends BaseCommand implements Listener {
           double progress = time / 20.0;
           bossBar.setProgress(progress);
 
-          // 残り3秒でカウントダウン
           if (time <= 3) {
             String title = ChatColor.WHITE + String.valueOf(time);
             player.sendTitle(title, "", 0, 20, 0);
             player.playSound(player.getLocation(), Sound.BLOCK_ANVIL_PLACE,0.5f,1.0f);
           }
-
           time--;
         } else {
           endGame(player, difficulty);
@@ -198,170 +313,79 @@ public class MemoryGameCommand extends BaseCommand implements Listener {
   }
 
 
-  //プレイヤーがブロックを右クリックした際に発生するイベント
   @EventHandler
   public void onPlayerInteractEvent(PlayerInteractEvent event) {
     if (event.getAction() != Action.RIGHT_CLICK_BLOCK || event.getHand() != org.bukkit.inventory.EquipmentSlot.HAND)
       return;
 
-    Pairs pairs = Pairs.getInstance(); //Pairsの要素数を再取得
     Player player = event.getPlayer();
-
-    //ブロックを右クリックしたらブロック情報を取得
-
     Block block = event.getClickedBlock();
 
     if (block == null || block.getType() != Material.DIAMOND_BLOCK)
       return;
-    //クリック先がダイヤモンドブロックなら、プレイヤー情報を取得
     UUID playerId = player.getUniqueId();
     String playerName = player.getName();
+    Pairs pairs = Pairs.getInstance();
+
     for(Pair pair : pairs.getPairs()){
       if(pair.containsBlock(block)){
-        player.sendMessage(pair.getName());
-        //過去にタッチされたブロックと今回タッチしたブロックが一致したら、ダイヤモンドブロックがAIRに変わる
-        if(this.lastTouched.containsKey(playerId) && this.lastTouched.get(playerId) == pair){
-          pair.removeBlocks();
-          player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP,1.0f,1.0f);
-          int newScore = playerScores.getOrDefault(playerName, 0) + 10;
-          playerScores.put(playerName, newScore);
-          player.sendMessage("10点！　現在のスコアは" + newScore + "点");
-        }else{
-          this.lastTouched.put(playerId, pair);
-          player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BELL,1.0f,1.0f);
-        }
+        removePairs(pair, player, playerId, playerName);
         break;
       }
     }
   }
-@EventHandler
+
+
+  @EventHandler
 public void onPlayerInteractEntityEvent(PlayerInteractEntityEvent event) {
   if (event.getHand() != EquipmentSlot.HAND) {
     return;
   }
   Player player = event.getPlayer();
   Entity clickedEntity = event.getRightClicked();
+
   UUID playerId = player.getUniqueId();
   String playerName = player.getName();
-  Pairs pairs = Pairs.getInstance(); //Pairsの要素数を再取得
+  Pairs pairs = Pairs.getInstance(); //
 
   for(Pair pair : pairs.getPairs()){
     if(pair.containsEntity(clickedEntity)){
-      player.sendMessage(pair.getName());
-      //過去にタッチされたエンティティと今回タッチしたエンティティが一致したら、エンティティが消える
-      if(this.lastTouched.containsKey(playerId) && this.lastTouched.get(playerId) == pair){
-        pair.removeEntities();
-        player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP,1.0f,1.0f);
-        int newScore = playerScores.getOrDefault(playerName, 0) + 10;
-        playerScores.put(playerName, newScore);
-        player.sendMessage("10点！　現在のスコアは" + newScore + "点");
-      }else{
-        this.lastTouched.put(playerId, pair);
-        player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BELL,1.0f,1.0f);
-      }
-      break;
+      removePairs(pair, player, playerId, playerName);
     }
   }
 }
 
   /**
-   * 難易度をコマンド引数から取得。
+   * 　右クリックしたペアが揃えば削除し、スコアを加算します。
    *
+   * @param pair　ペア要素
    * @param player　コマンドを実行したプレイヤー
-   * @param strings　コマンド引数
-   * @return NONE
+   * @param playerId　プレイヤーの情報
+   * @param playerName　プレイヤーの名前
    */
-  private String getDifficulty(Player player, String[] strings) {
-    if(strings.length ==1 && (EASY.equals(strings[0]) || NORMAL.equals(strings[0]) || HARD.equals(
-        strings[0]))){
-      return strings[0];
+  private void removePairs(Pair pair, Player player, UUID playerId, String playerName) {
+    player.sendMessage(pair.getName());
+    if(this.lastTouched.containsKey(playerId) && this.lastTouched.get(playerId) == pair){
+      pair.removeBlocks();
+      pair.removeEntities();
+      player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP,1.0f,1.0f);
+      addScore(player, playerName);
+    }else{
+      this.lastTouched.put(playerId, pair);
+      player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BELL,1.0f,1.0f);
     }
-    player.sendMessage(ChatColor.RED + "実行できません。コマンド引数の１つ目に[easy,normal,hard]いずれかの難易度指定が必要です。");
-    return NONE;
   }
 
   /**
-   * ゲーム難易度HARDを始める前にプレイヤーの状態を設定する。
-   * 体力と空腹度を最大にして、装備はネザライト一式になる。
+   * スコアの加算を行います。
    *
    * @param player　コマンドを実行したプレイヤー
+   * @param playerName　プレイヤーの名前
    */
-  private void initPlayerStatus(Player player) {
-    player.setHealth(20);
-    player.setFoodLevel(20);
-
-    PlayerInventory inventory = player.getInventory();
-    inventory.setHelmet(new ItemStack(Material.NETHERITE_HELMET));
-    inventory.setChestplate(new ItemStack(Material.NETHERITE_CHESTPLATE));
-    inventory.setLeggings(new ItemStack(Material.NETHERITE_LEGGINGS));
-    inventory.setBoots(new ItemStack(Material.NETHERITE_BOOTS));
-  }
-
-    /**
-     * エンティティの出現エリアを取得し、ブロックを2つ生成後、ペアに登録する。
-     * @param player　コマンドを実行したプレイヤー
-     * @param difficulty 難易度
-     * @return プレイヤーの現在位置
-     */
-    public void getSpawnLocation(Player player, String difficulty){
-      Pairs pairs = Pairs.getInstance();
-      Location playerLocation = player.getLocation();
-
-      switch(difficulty){
-        case EASY:
-      for (Pair pair : pairs.getPairs()) {
-        for (int j = 0; j < 2; j++) {
-          //現在のプレイヤー位置の周りにランダム（前後１０ブロック以内）で位置を取得
-          Location memoryLoc = getMemoryLoc(player.getWorld(), playerLocation);
-          // ブロックが既にある場合、もう一度位置を生成する
-          if (memoryLoc.getBlock().getType() != Material.AIR) {
-            j--;
-            continue;
-          }
-          memoryLoc.getBlock().setType(Material.DIAMOND_BLOCK);
-          pair.addBlock(memoryLoc.getBlock());
-        }
-      }
-      break;
-
-        case NORMAL:
-          // NORMALモードは白い羊をスポーンさせる
-          for (Pair pair : pairs.getPairs()) {
-            for (int j = 0; j < 2; j++) {
-              Location memoryLoc = getMemoryLoc(player.getWorld(), playerLocation);
-              Sheep sheep = (Sheep) player.getWorld().spawnEntity(memoryLoc, EntityType.SHEEP);
-              sheep.setColor(DyeColor.WHITE); // 白い羊を設定
-              pair.addEntity(sheep);
-            }
-          }
-          break;
-
-        case HARD:
-          initPlayerStatus(player);
-          for (Pair pair : pairs.getPairs()) {
-            for (int j = 0; j < 2; j++) {
-              Location memoryLoc = getMemoryLoc(player.getWorld(), playerLocation);
-              Zombie zombie = (Zombie) player.getWorld().spawnEntity(memoryLoc, EntityType.ZOMBIE);
-              pair.addEntity(zombie);
-            }
-          }
-          break;
-      }
-    }
-
-  /**
-   * ブロックとエンティティの出現エリアを取得する
-   * @param world　プレイヤーが所属するワールド
-   * @param playerLocation　コマンドを実行したプレイヤーの現在地
-   * @return memoryLoc 出現エリア
-   */
-  private static Location getMemoryLoc(World world, Location playerLocation) {
-    int randomX = new SplittableRandom().nextInt(20) - 10;
-    int randomZ = new SplittableRandom().nextInt(20) - 10;
-    double x = playerLocation.getX() + randomX;
-    double y = playerLocation.getY();
-    double z = playerLocation.getZ() + randomZ;
-
-    return new Location(world, x, y, z);
+  private void addScore(Player player, String playerName) {
+    int newScore = playerScores.getOrDefault(playerName, 0) + 10;
+    playerScores.put(playerName, newScore);
+    player.sendMessage("10点！　現在のスコアは" + newScore + "点");
   }
 }
+
