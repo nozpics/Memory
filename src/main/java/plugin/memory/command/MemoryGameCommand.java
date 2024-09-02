@@ -8,7 +8,6 @@ import java.util.SplittableRandom;
 import java.util.UUID;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.Difficulty;
 import org.bukkit.DyeColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -55,8 +54,8 @@ public class MemoryGameCommand extends BaseCommand implements Listener {
 
   private final Map<UUID, Pair> lastTouched = new HashMap<>();
   private final Map<String, Integer> playerScores = new HashMap<>();
-  private Main main;
-  private PlayerScoreData playerScoreData = new PlayerScoreData();
+  private final Main main;
+  private final PlayerScoreData playerScoreData = new PlayerScoreData();
   private BossBar bossBar;
 
   public MemoryGameCommand(Main main){
@@ -76,49 +75,11 @@ public class MemoryGameCommand extends BaseCommand implements Listener {
       player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BASS,1.0f,1.0f);
       return false;
     }
-
     initGame(player,difficulty);
-
-    //制限時間の設定
-    String finalDifficulty = difficulty;
-    new BukkitRunnable() {
-      int time = 20;
-
-      @Override
-      public void run() {
-        if(time > 0){
-          double progress = time / 20.0;
-          bossBar.setProgress(progress);
-
-          // 残り3秒でカウントダウン
-          if (time <= 3) {
-            String title = ChatColor.WHITE + String.valueOf(time);
-            player.sendTitle(title, "", 0, 20, 0);
-            player.playSound(player.getLocation(), Sound.BLOCK_ANVIL_PLACE,0.5f,1.0f);
-          }
-
-          time--;
-        } else {
-          bossBar.setVisible(false);
-          cancel();
-          // 制限時間が経過した際に実行する処理
-          player.playSound(player.getLocation(), Sound.ITEM_GOAT_HORN_SOUND_5,1.0f,1.0f);
-          int finalScore = playerScores.get(player.getName());
-          player.sendTitle("ゲーム終了！", player.getName() + " : " + finalScore + "点 (" + finalDifficulty + ")", 10, 50, 20);
-
-
-          // 残っているダイヤブロック、エンティティを消す処理
-          Pairs pairs = Pairs.getInstance();
-          pairs.getPairs().forEach(Pair::removeBlocks);
-          pairs.getPairs().forEach(Pair::removeEntities);
-
-          playerScoreData.insert(new PlayerScore(player.getName(),finalScore,finalDifficulty));
-
-        }
-      }
-    }.runTaskTimer(main, 0,20L);
+    countDown(player, difficulty);
     return true;
   }
+
 
 
   @Override
@@ -130,8 +91,8 @@ public class MemoryGameCommand extends BaseCommand implements Listener {
   /**
    * ゲームを開始する処理。
    * @param player　コマンドを実行したプレイヤー
+   * @param difficulty 難易度
    */
-
   private void initGame(Player player, String difficulty) {
     Pairs.resetInstance();
     resetBossBar();
@@ -168,7 +129,6 @@ public class MemoryGameCommand extends BaseCommand implements Listener {
 
   /**
    * 現在登録されているスコアの一覧をメッセージに送る。
-   *
    * @param player　プレイヤー
    */
   private void sendPlayerScoreList(Player player) {
@@ -181,6 +141,60 @@ public class MemoryGameCommand extends BaseCommand implements Listener {
               + playerScore.getDifficulty() + "  |  "
               + playerScore.getRegisteredAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
     }
+  }
+
+  /**
+   * 制限時間20秒を設定後、BossBarにて視認できるようにする。
+   * ゲーム終了３秒前からカウントダウンし、ゲーム終了する。
+   *
+   * @param player　コマンドを実行したプレイヤー
+   * @param difficulty　難易度
+   */
+  private void countDown(Player player, String difficulty) {
+    new BukkitRunnable() {
+      int time = 20;
+
+      @Override
+      public void run() {
+        if(time > 0){
+          double progress = time / 20.0;
+          bossBar.setProgress(progress);
+
+          // 残り3秒でカウントダウン
+          if (time <= 3) {
+            String title = ChatColor.WHITE + String.valueOf(time);
+            player.sendTitle(title, "", 0, 20, 0);
+            player.playSound(player.getLocation(), Sound.BLOCK_ANVIL_PLACE,0.5f,1.0f);
+          }
+
+          time--;
+        } else {
+          endGame(player, difficulty);
+          cancel();
+        }
+      }
+    }.runTaskTimer(main, 0,20L);
+  }
+
+  /**
+   * ゲーム終了時に動作するもの。
+   * ゲーム終了をサウンドとともに画面表示し、残っているエンティティを削除後、最終スコアを登録する。
+   * @param player　コマンドを実行したプレイヤー
+   * @param difficulty  難易度
+   */
+  private void endGame(Player player, String difficulty) {
+    bossBar.setVisible(false);
+
+    player.playSound(player.getLocation(), Sound.ITEM_GOAT_HORN_SOUND_5,1.0f,1.0f);
+    int finalScore = playerScores.get(player.getName());
+    player.sendTitle("ゲーム終了！", player.getName() + " : " + finalScore + "点 (" + difficulty
+        + ")", 10, 50, 20);
+
+    Pairs pairs = Pairs.getInstance();
+    pairs.getPairs().forEach(Pair::removeBlocks);
+    pairs.getPairs().forEach(Pair::removeEntities);
+
+    playerScoreData.insert(new PlayerScore(player.getName(),finalScore, difficulty));
   }
 
 
@@ -255,7 +269,7 @@ public void onPlayerInteractEntityEvent(PlayerInteractEntityEvent event) {
    *
    * @param player　コマンドを実行したプレイヤー
    * @param strings　コマンド引数
-   * @return　難易度
+   * @return NONE
    */
   private String getDifficulty(Player player, String[] strings) {
     if(strings.length ==1 && (EASY.equals(strings[0]) || NORMAL.equals(strings[0]) || HARD.equals(
@@ -287,9 +301,9 @@ public void onPlayerInteractEntityEvent(PlayerInteractEntityEvent event) {
      * エンティティの出現エリアを取得し、ブロックを2つ生成後、ペアに登録する。
      * @param player　コマンドを実行したプレイヤー
      * @param difficulty 難易度
-     * @return
+     * @return プレイヤーの現在位置
      */
-    public Location getSpawnLocation(Player player, String difficulty){
+    public void getSpawnLocation(Player player, String difficulty){
       Pairs pairs = Pairs.getInstance();
       Location playerLocation = player.getLocation();
 
@@ -333,7 +347,6 @@ public void onPlayerInteractEntityEvent(PlayerInteractEntityEvent event) {
           }
           break;
       }
-      return playerLocation;
     }
 
   /**
@@ -342,7 +355,6 @@ public void onPlayerInteractEntityEvent(PlayerInteractEntityEvent event) {
    * @param playerLocation　コマンドを実行したプレイヤーの現在地
    * @return memoryLoc 出現エリア
    */
-
   private static Location getMemoryLoc(World world, Location playerLocation) {
     int randomX = new SplittableRandom().nextInt(20) - 10;
     int randomZ = new SplittableRandom().nextInt(20) - 10;
@@ -350,7 +362,6 @@ public void onPlayerInteractEntityEvent(PlayerInteractEntityEvent event) {
     double y = playerLocation.getY();
     double z = playerLocation.getZ() + randomZ;
 
-    Location memoryLoc = new Location(world, x, y, z);
-    return memoryLoc;
+    return new Location(world, x, y, z);
   }
 }
