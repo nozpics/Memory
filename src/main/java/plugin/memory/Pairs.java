@@ -3,6 +3,7 @@ package plugin.memory;
 import java.util.ArrayList;
 import java.util.List;
 
+//シングルトンクラス
 public class Pairs {
   private static Pairs instance;
   private final List<Pair> pairs;
@@ -13,7 +14,6 @@ public class Pairs {
     this.pairs = new ArrayList<>();
   }
 
-  // インスタンスはゲッターで(生成)取得する
   public static synchronized Pairs getInstance(){
     if(instance == null){
       instance =  new Pairs();
@@ -22,27 +22,12 @@ public class Pairs {
   }
 
   public static synchronized void resetInstance() {
-    instance = new Pairs(); // 新しいインスタンスで置き換え
+    instance = new Pairs();
   }
 
-  // ラッパーメソッド
+
   public void add(Pair p){
     this.pairs.add(p);
-  }
-
-  // ラッパーメソッド
-  public void remove(Pair p){
-    this.pairs.remove(p);
-  }
-
-  // ラッパーメソッド
-  public int size(){
-    return this.pairs.size();
-  }
-
-  // ラッパーメソッド
-  public Pair getPair(int i){
-    return this.pairs.get(i);
   }
 
   // リストオブジェクト自体を取得

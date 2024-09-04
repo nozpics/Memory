@@ -86,6 +86,8 @@ public class MemoryGameCommand extends BaseCommand implements Listener {
     return false;
   }
 
+
+
   /**
    * 現在登録されているスコアの一覧をメッセージに送る。
    * @param player　プレイヤー
@@ -335,6 +337,7 @@ public class MemoryGameCommand extends BaseCommand implements Listener {
 
     playerScoreData.insert(new PlayerScore(player.getName(),finalScore, difficulty));
   }
+
 
 
   @EventHandler
