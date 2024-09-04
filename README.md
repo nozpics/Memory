@@ -1,70 +1,42 @@
 # memorygame
 
-「memorygame」は、Javaを使用したマインクラフト上のコマンドで起動できる神経衰弱ゲームです。
+「memorygame」は、Javaを使用して開発されたマインクラフト用の神経衰弱ゲームです。
+コマンド一つで簡単にゲームを始めることができます。
 
 
 # DEMO
 
 コマンド一つで神経衰弱ゲームを楽しむことができます。
 
-
-
 https://github.com/user-attachments/assets/6a376591-2930-4077-9675-f2d47fbf9c4d
-
-
-
 
 # Features
 
-「memorygame」は、コマンド引数の１つ目に「easy , normal , hard」のいずれかを入力することで出現する対象が変化し、難易度の設定ができます。
-easy  : ダイヤモンドブロック
-normal: 動きまわる羊
-hard  : 攻撃してくるゾンビ
+「memorygame」は、コマンド引数に「easy」「normal」「hard」のいずれかを指定することでゲームの難易度を設定できます。各難易度に対応する出現対象は以下の通りです。
 
-
-# Requirement
-
-"hoge"を動かすのに必要なライブラリなどを列挙する
-
-* huga 3.5.2
-* hogehuga 1.0.2
-
-# Installation
-
-Requirementで列挙したライブラリなどのインストール方法を説明する
-
-```bash
-pip install huga_package
-```
+* **easy** : ダイヤモンドブロック
+* **normal**: 動き回る羊
+* **hard**  : 攻撃してくるゾンビ
 
 # Usage
 
-DEMOの実行方法など、"hoge"の基本的な使い方を説明する
+ゲームを開始するには、以下のコマンドを使用します。
 
-```bash
-git clone https://github.com/hoge/~
-cd examples
-python demo.py
-```
+/memorygame difficulty
 
-# Note
+`difficulty`: ゲームの難易度を指定します。`easy`, `normal`, `hard` のいずれかを選択してください。
 
-注意点などがあれば書く
+例: /memorygame easy
 
-# Author
+ゲームが開始されたら右クリックで対象にタッチしていきます。チャット内にペア番号が表示され、同じペアをタッチすることができたらスコアが加算されます。
 
-作成情報を列挙する
+# Requirements
 
-* 作成者
-* 所属
-* E-mail
-
-# License
-ライセンスを明示する
-
-"hoge" is under [MIT license](https://en.wikipedia.org/wiki/MIT_License).
-
-社内向けなら社外秘であるととを明示してる
+* Minecraft ver: 1.20.4
+* Spigot ver: 1.20.4
 
 
-"hoge" is Confidential.
+# Skills　Used
+
+* Java
+* Mysql
