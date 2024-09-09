@@ -45,13 +45,17 @@ https://github.com/user-attachments/assets/e53c6380-a757-4dc4-bb38-fbae0c3b66e0
 
 2.データベースを作成する。
 
-　`CREATE DATABASE memory_score;`
-  
-　`USE memory_score;`
-  
+```
+CREATE DATABASE memory_score;
+```
+```
+USE memory_score;
+```  
 3.テーブルを作成する。
 
-　`CREATE TABLE memory_score(id int auto_increment, player_name varchar(100), score int, difficulty varchar(30), registered_at datetime, primary key(id));`
+```
+CREATE TABLE memory_score(id int auto_increment, player_name varchar(100), score int, difficulty varchar(30), registered_at datetime, primary key(id));
+```
    
 4.mybatis-config.xmlにローカル環境に合わせたurl,username,passwordを設定する。
 
