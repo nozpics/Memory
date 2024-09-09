@@ -20,7 +20,6 @@ https://github.com/user-attachments/assets/e53c6380-a757-4dc4-bb38-fbae0c3b66e0
 * **normal**: 動き回る羊
 * **hard**  : 攻撃してくるゾンビ
 
-コマンド引数に「list」を指定すると過去の結果を表示することができます。
 
 # Usage
 
@@ -36,6 +35,25 @@ https://github.com/user-attachments/assets/e53c6380-a757-4dc4-bb38-fbae0c3b66e0
 
 制限時間：20秒
 
+# DataBase
+
+データベースに接続後、コマンド引数に「list」を指定すると過去のスコアを表示することができます。
+
+### ***データベースに接続する方法***
+
+1.自身のローカル環境でMySQLに接続する
+
+2.データベースを作成する。
+
+　`CREATE DATABASE memory_score;`
+  
+　`USE memory_score;`
+  
+3.テーブルを作成する。
+
+　`CREATE TABLE memory_score(id int auto_increment, player_name varchar(100), score int, difficulty varchar(30), registered_at datetime, primary key(id));`
+   
+4.mybatis-config.xmlにローカル環境に合わせたurl,username,passwordを設定する。
 
 # Requirements
 
