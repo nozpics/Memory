@@ -1,7 +1,6 @@
 # memorygame
 
 「memorygame」は、Javaを使用して開発されたマインクラフト用の神経衰弱ゲームです。
-コマンド一つで簡単にゲームを始めることができます。
 
 
 # DEMO
@@ -30,13 +29,16 @@ https://github.com/user-attachments/assets/6a376591-2930-4077-9675-f2d47fbf9c4d
 
 ゲームが開始されたら右クリックで対象にタッチしていきます。チャット内にペア番号が表示され、同じペアをタッチすることができたらスコアが加算されます。
 
+制限時間：20秒
+  
+
 # Requirements
 
 * Minecraft ver: 1.20.4
 * Spigot ver: 1.20.4
 
 
-# Skills　Used
+# Skills　
 
 * Java
 * Mysql
