@@ -20,6 +20,8 @@ https://github.com/user-attachments/assets/e53c6380-a757-4dc4-bb38-fbae0c3b66e0
 * **normal**: 動き回る羊
 * **hard**  : 攻撃してくるゾンビ
 
+コマンド引数に「list」を指定すると過去の結果を表示することができます。
+
 # Usage
 
 ゲームを開始するには、以下のコマンドを使用します。
@@ -33,7 +35,7 @@ https://github.com/user-attachments/assets/e53c6380-a757-4dc4-bb38-fbae0c3b66e0
 ゲームが開始されたら<ins>***右クリック***</ins>で対象にタッチしていきます。チャット内にペア番号が表示され、同じペアをタッチすることができたらスコアが加算されます。
 
 制限時間：20秒
-  
+
 
 # Requirements
 
@@ -45,3 +47,4 @@ https://github.com/user-attachments/assets/e53c6380-a757-4dc4-bb38-fbae0c3b66e0
 
 * Java
 * Mysql
+* MyBatis
