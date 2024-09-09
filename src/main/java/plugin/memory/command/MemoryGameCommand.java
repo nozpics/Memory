@@ -129,14 +129,14 @@ public class MemoryGameCommand extends BaseCommand implements Listener {
    */
   private void startGameCountdown(Player player, String difficulty) {
     new BukkitRunnable() {
-      int countdown = 3;
+      int countDown = 3;
 
       @Override
       public void run() {
-        if (countdown > 0) {
-          player.sendTitle(ChatColor.WHITE + String.valueOf(countdown), "", 0, 20, 0);
+        if (countDown > 0) {
+          player.sendTitle(ChatColor.WHITE + String.valueOf(countDown), "", 0, 20, 0);
           player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_HARP, 1.0f, 1.0f);
-          countdown--;
+          countDown--;
         } else {
           initGame(player, difficulty);
           finalCountDown(player, difficulty);
@@ -300,20 +300,20 @@ public class MemoryGameCommand extends BaseCommand implements Listener {
    */
   private void finalCountDown(Player player, String difficulty) {
     new BukkitRunnable() {
-      int GameTime = 20;
+      int gameTime = 20;
 
       @Override
       public void run() {
-        if(GameTime > 0){
-          double progress = GameTime / 20.0;
+        if(gameTime > 0){
+          double progress = gameTime / 20.0;
           bossBar.setProgress(progress);
 
-          if (GameTime <= 3) {
-            String title = ChatColor.WHITE + String.valueOf(GameTime);
+          if (gameTime <= 3) {
+            String title = ChatColor.WHITE + String.valueOf(gameTime);
             player.sendTitle(title, "", 0, 20, 0);
             player.playSound(player.getLocation(), Sound.BLOCK_ANVIL_PLACE,0.5f,1.0f);
           }
-          GameTime--;
+          gameTime--;
         } else {
           endGame(player, difficulty);
           cancel();
