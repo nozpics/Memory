@@ -52,6 +52,8 @@ public class MemoryGameCommand extends BaseCommand implements Listener {
   public static final String NONE = "none";
   public static final String List ="list";
 
+  private static final int AREA_RADIUS = 10;
+  private static final int AREA_DIAMETER = AREA_RADIUS * 2;
   private final Map<UUID, Pair> lastTouched = new HashMap<>();
   private final Map<String, Integer> playerScores = new HashMap<>();
   private final Main main;
@@ -212,6 +214,8 @@ public class MemoryGameCommand extends BaseCommand implements Listener {
           case HARD:
             handleHardDifficulty(memoryLoc, pair, player);
             break;
+          default:
+            throw new IllegalArgumentException("予期せぬ難易度の値: " + difficulty);
         }
       }
     }
@@ -223,9 +227,10 @@ public class MemoryGameCommand extends BaseCommand implements Listener {
    * @param playerLocation　コマンドを実行したプレイヤーの現在地
    * @return memoryLoc 出現エリア
    */
+
   private static Location getMemoryLoc(World world, Location playerLocation) {
-    int randomX = new SplittableRandom().nextInt(20) - 10;
-    int randomZ = new SplittableRandom().nextInt(20) - 10;
+    int randomX = new SplittableRandom().nextInt(AREA_DIAMETER) - AREA_RADIUS;
+    int randomZ = new SplittableRandom().nextInt(AREA_DIAMETER) - AREA_RADIUS;
     double x = playerLocation.getX() + randomX;
     double y = playerLocation.getY();
     double z = playerLocation.getZ() + randomZ;
@@ -342,14 +347,17 @@ public class MemoryGameCommand extends BaseCommand implements Listener {
 
   @EventHandler
   public void onPlayerInteractEvent(PlayerInteractEvent event) {
-    if (event.getAction() != Action.RIGHT_CLICK_BLOCK || event.getHand() != org.bukkit.inventory.EquipmentSlot.HAND)
+    if (event.getAction() != Action.RIGHT_CLICK_BLOCK || event.getHand() != org.bukkit.inventory.EquipmentSlot.HAND) {
       return;
+    }
 
     Player player = event.getPlayer();
     Block block = event.getClickedBlock();
 
-    if (block == null || block.getType() != Material.DIAMOND_BLOCK)
+    if (block == null || block.getType() != Material.DIAMOND_BLOCK) {
       return;
+    }
+
     UUID playerId = player.getUniqueId();
     String playerName = player.getName();
     Pairs pairs = Pairs.getInstance();

@@ -14,6 +14,7 @@ public class Pairs {
     this.pairs = new ArrayList<>();
   }
 
+  //インスタンスを取得
   public static synchronized Pairs getInstance(){
     if(instance == null){
       instance =  new Pairs();
@@ -21,16 +22,17 @@ public class Pairs {
     return instance;
   }
 
+  //インスタンスをリセット
   public static synchronized void resetInstance() {
     instance = new Pairs();
   }
 
-
+  //リストにPairオブジェクトを追加
   public void add(Pair p){
     this.pairs.add(p);
   }
 
-  // リストオブジェクト自体を取得
+  // リストのコピーを返す
   public List<Pair> getPairs(){
     return new ArrayList<>(this.pairs);
   }
