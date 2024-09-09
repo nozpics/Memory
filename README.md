@@ -7,7 +7,10 @@
 
 コマンド一つで神経衰弱ゲームを楽しむことができます。
 
-https://github.com/user-attachments/assets/6a376591-2930-4077-9675-f2d47fbf9c4d
+
+https://github.com/user-attachments/assets/e53c6380-a757-4dc4-bb38-fbae0c3b66e0
+
+
 
 # Features
 
@@ -27,7 +30,7 @@ https://github.com/user-attachments/assets/6a376591-2930-4077-9675-f2d47fbf9c4d
 
 例: /memorygame easy
 
-ゲームが開始されたら右クリックで対象にタッチしていきます。チャット内にペア番号が表示され、同じペアをタッチすることができたらスコアが加算されます。
+ゲームが開始されたら<ins>***右クリック***</ins>で対象にタッチしていきます。チャット内にペア番号が表示され、同じペアをタッチすることができたらスコアが加算されます。
 
 制限時間：20秒
   
