@@ -1,6 +1,6 @@
 # memorygame
 
-「memorygame」は、Javaを使用して開発されたマインクラフト用の神経衰弱ゲームです。
+「memorygame」は、Javaを使用して開発されたマインクラフト用の神経衰弱ゲームです。(Macでのみ動作確認済）
 
 
 # デモ
