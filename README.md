@@ -3,22 +3,27 @@
 「memorygame」は、Javaを使用して開発されたマインクラフト用の神経衰弱ゲームです。(Macでのみ動作確認済）
 
 
-# デモ
+# 特徴・参考動画
 
-コマンド一つで神経衰弱ゲームを楽しむことができます。
-
-
-https://github.com/user-attachments/assets/e53c6380-a757-4dc4-bb38-fbae0c3b66e0
-
-
-
-# 特徴
-
-「memorygame」は、コマンド引数に「easy」「normal」「hard」のいずれかを指定することでゲームの難易度を設定できます。各難易度に対応する出現対象は以下の通りです。
+「memorygame」は、コマンド引数に「easy」「normal」「hard」のいずれかを指定することでゲームの難易度を設定できます。各難易度に対応する出現対象と参考動画は以下の通りです。
 
 * **easy** : ダイヤモンドブロック
+
+
+https://github.com/user-attachments/assets/7670edc2-02ac-4a1e-8a32-e4a3239571ed
+
+
+
 * **normal**: 動き回る羊
+
+https://github.com/user-attachments/assets/8d05c10c-4c89-472f-aa50-632885668d8e
+
+
 * **hard**  : 攻撃してくるゾンビ
+
+
+https://github.com/user-attachments/assets/8f001c09-7076-40ca-b975-bb38566c279a
+
 
 
 # 遊び方
