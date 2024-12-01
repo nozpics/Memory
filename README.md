@@ -1,45 +1,41 @@
 # はじめに
 
-こちらは、JavaのSpigot-pluginを使用して開発した、「マインクラフト」というゲーム内で遊ぶことができる**神経衰弱ゲーム**です。(Macでのみ動作確認済）
+こちらは、Javaのspigot-pluginを使用して開発した、「マインクラフト」というゲーム内で遊ぶことができる**神経衰弱ゲーム**です。(Macでのみ動作確認済）
 
 
-# **memorygame**特徴・参考動画
 
-「memorygame」は、下記「遊び方」に記載してあるコマンドを入力することで遊ぶことができ、コマンド引数に「easy」「normal」「hard」のいずれかを指定することでゲームの難易度を設定できます。各難易度に対応する出現対象と参考動画は以下の通りです。
+# デモ動画
+
+https://github.com/user-attachments/assets/deb88474-ec09-403f-bc76-69dbafd3274c
+
+# 特徴
+
+「memorygame」は、下記「遊び方」に記載してあるコマンドを入力することで遊ぶことができます。
+また、難易度により出現対象が変わります。出現対象は以下のとおりです：
 
 * **easy** : ダイヤモンドブロック
 
-
-https://github.com/user-attachments/assets/7670edc2-02ac-4a1e-8a32-e4a3239571ed
-
-
-
 * **normal**: 動き回る羊
 
-https://github.com/user-attachments/assets/8d05c10c-4c89-472f-aa50-632885668d8e
-
-
 * **hard**  : 攻撃してくるゾンビ
-
-
-https://github.com/user-attachments/assets/8f001c09-7076-40ca-b975-bb38566c279a
-
-
-
+  
 # 遊び方
 
-ゲームを開始するには、以下のコマンドを使用します。
+ゲームを開始するには、以下のコマンドを使用します：
 
 ```
-/memorygame difficulty
+/memorygame <difficulty>
 ```
 
-`difficulty`: ゲームの難易度を指定します。`easy`, `normal`, `hard` のいずれかを選択してください。
+`<difficulty>`: ゲームの難易度を指定します。`easy`, `normal`, `hard` のいずれかを入力してください。
 
 例:
 ```
 /memorygame easy
 ```
+
+
+
 
 ゲームが開始されたら<ins>***右クリック***</ins>で対象にタッチしていきます。チャット内にペア番号が表示され、同じペアをタッチすることができたらスコアが加算されます。
 
@@ -57,14 +53,19 @@ https://github.com/user-attachments/assets/8f001c09-7076-40ca-b975-bb38566c279a
 
 ```
 CREATE DATABASE memory_score;
-```
-```
 USE memory_score;
 ```  
 3.テーブルを作成する。
 
 ```
-CREATE TABLE memory_score(id int auto_increment, player_name varchar(100), score int, difficulty varchar(30), registered_at datetime, primary key(id));
+CREATE TABLE memory_score(
+      id int auto_increment,
+      player_name varchar(100),
+      score int,
+      difficulty varchar(30),
+      registered_at datetime,
+      primary key(id)
+);
 ```
    
 4.mybatis-config.xmlにローカル環境に合わせたurl,username,passwordを設定する。
@@ -80,3 +81,7 @@ CREATE TABLE memory_score(id int auto_increment, player_name varchar(100), score
 * Java
 * Mysql
 * MyBatis
+
+# おわりに
+このプロジェクトを通じて、Javaプログラミング、Spigot APIの活用、データベース連携等の基礎を学ぶことができました。何よりも、常に楽しく作成できたことで自信にも繋がりました。
+今後もこのプロジェクトで得た知識と経験を活かし、より複雑で大規模なシステム開発にも挑戦していく所存です。ここまでご覧いただき、ありがとうございました。
